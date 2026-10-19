@@ -1,0 +1,10 @@
+# data, weights and training outputs are not part of the repository
+data/
+runs/
+*.pt
+*.log
+__pycache__/
+.venv/
+*.png
+*.pdf
+*.svg

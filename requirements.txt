@@ -1,0 +1,5 @@
+# Runs in the paper used Ultralytics 8.4.14-8.4.158 (see README, Environment)
+ultralytics>=8.4.14,<8.5
+numpy
+matplotlib
+scikit-learn   # Fig. 5 (t-SNE)
