@@ -21,9 +21,9 @@ DOMAINS = {
 }
 MODELS = {
     'Before fine-tuning (zero-shot)':
-        os.path.join(RUNS, 'synthetic/yolov8n_mixed17/weights/best.pt'),
+        os.environ.get('MODEL_BEFORE', os.path.join(RUNS, 'synthetic/yolov8n_mixed17/weights/best.pt')),
     'After fine-tuning (+10% real data)':
-        os.path.join(RUNS, 'finetune/yolov8n_cocosyn_10/weights/best.pt'),
+        os.environ.get('MODEL_AFTER', os.path.join(RUNS, 'finetune/yolov8n_cocosyn_10/weights/best.pt')),
 }
 N_PER, SEED, BATCH = 250, 0, 64
 random.seed(SEED); np.random.seed(SEED)
@@ -41,7 +41,7 @@ colors = {'Synthetic (Sunny)':'#F2C14E','Synthetic (Foggy)':'#9AA5B1',
           'Synthetic (Rainy)':'#5B9BD5','Synthetic (Snowy)':'#A0C4E8',
           'Real (AOD4)':'#C0392B'}
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 5.2))
+fig, axes = plt.subplots(1, 2, figsize=(8.6, 4.6))
 for ax, (mname, mpath) in zip(axes, MODELS.items()):
     if not os.path.exists(mpath):
         print("MISSING model:", mpath)
@@ -64,22 +64,26 @@ for ax, (mname, mpath) in zip(axes, MODELS.items()):
         m = labels == name
         is_real = 'Real' in name
         ax.scatter(Z[m,0], Z[m,1],
-                   s=(28 if is_real else 12),
+                   s=(70 if is_real else 28),
                    c=colors[name], label=name,
                    alpha=(0.85 if is_real else 0.5),
                    edgecolors=('black' if is_real else 'none'),
                    linewidths=0.3,
                    marker=('*' if is_real else 'o'),
                    zorder=(3 if is_real else 2))
-    ax.set_title(mname, fontsize=11, weight='bold')
+    ax.set_title(mname.replace(' (', '\n('), fontsize=15, weight='bold')  # two lines so the titles never overlap
     ax.set_xticks([])
     ax.set_yticks([])
     for s in ax.spines.values():
         s.set_edgecolor('#B9C6D4')
 
-axes[0].legend(loc='upper right', fontsize=7.5, framealpha=0.9)
-# fig.suptitle('Synthetic-to-Real Domain Gap: Before vs After Fine-tuning', fontsize=13, weight='bold')
-plt.tight_layout()
+# One shared legend below both panels, sized to stay legible at single-column print width.
+handles, lbls = axes[0].get_legend_handles_labels()
+for h in handles:
+    h.set_alpha(1.0)
+fig.legend(handles, lbls, loc='lower center', ncol=3, fontsize=14, frameon=False,
+           markerscale=1.6, bbox_to_anchor=(0.5, -0.02))
+plt.tight_layout(rect=(0, 0.15, 1, 1))
 plt.savefig('fig_tsne_before_after.png', dpi=300, bbox_inches='tight')
 plt.savefig('fig_tsne_before_after.pdf', bbox_inches='tight')
 print('saved fig_tsne_before_after')

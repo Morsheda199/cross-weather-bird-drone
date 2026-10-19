@@ -6,6 +6,10 @@ Zero-shot (0%) points exist only for models with synthetic pre-training.
 import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# Font sizes chosen so text stays legible when the figure is printed at single-column width (~16 cm).
+plt.rcParams.update({"font.size": 15, "axes.titlesize": 17, "axes.labelsize": 15,
+                     "xtick.labelsize": 14, "ytick.labelsize": 14, "legend.fontsize": 13})
+
 PCT = [1, 5, 10, 25, 50, 100]
 DATA = {
     "YOLOv8n": {
@@ -23,16 +27,18 @@ DATA = {
 STYLE = {"COCO + Synthetic": ("#2E5496", "o-"), "COCO": ("#2E7D5B", "s--"),
          "Synthetic only": ("#D98E04", "D-."), "Random": ("#B23A48", "^:")}
 
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.6), sharey=True)
+fig, axes = plt.subplots(1, 2, figsize=(8.6, 4.3), sharey=True)
 for ax, (name, curves) in zip(axes, DATA.items()):
     for label, d in curves.items():
         color, fmt = STYLE[label]
-        ax.plot(PCT, d["v"], fmt, color=color, lw=1.8, ms=6, label=label)
+        ax.plot(PCT, d["v"], fmt, color=color, lw=2.2, ms=8, label=label)
         if "err" in d:
-            ax.errorbar([1], [d["v"][0]], yerr=[d["err"]], color=color, capsize=3, lw=1)
+            ax.errorbar([1], [d["v"][0]], yerr=[d["err"]], color=color, capsize=4, lw=1.4)
         if "zs" in d:
-            ax.scatter([0], [d["zs"]], marker="*", s=140, color=color, edgecolors="black", linewidths=0.5, zorder=4)
-    ax.set_title(name, fontsize=12, weight="bold")
+            ax.scatter([0], [d["zs"]], marker="*", s=300, color=color, edgecolors="black", linewidths=0.5, zorder=4)
+    ax.annotate("zero-shot", xy=(0, 0.04), xytext=(10, 0), textcoords="offset points",
+                fontsize=12, va="center")
+    ax.set_title(name, weight="bold")
     ax.set_xscale("symlog", linthresh=1)
     ax.set_xticks([0, 1, 5, 10, 25, 50, 100])
     ax.set_xticklabels(["0", "1", "5", "10", "25", "50", "100"])
@@ -40,8 +46,10 @@ for ax, (name, curves) in zip(axes, DATA.items()):
     ax.set_ylim(0.0, 1.02)
     ax.grid(True, alpha=0.3)
 axes[0].set_ylabel("AOD4 mAP@50")
-axes[0].legend(loc="lower right", fontsize=9)
-plt.tight_layout()
+# One shared legend below both panels, so it never covers a data point.
+h, l = axes[0].get_legend_handles_labels()
+fig.legend(h, l, loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.01))
+plt.tight_layout(rect=(0, 0.08, 1, 1))
 plt.savefig("fig_finetune.png", dpi=300, bbox_inches="tight")
 plt.savefig("fig_finetune.pdf", bbox_inches="tight")
 print("saved fig_finetune")
